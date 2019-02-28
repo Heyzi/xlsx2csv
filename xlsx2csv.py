@@ -156,7 +156,7 @@ class Xlsx2csv:
     """
 
     def __init__(self, xlsxfile, **options):
-        options.setdefault("delimiter", ",")
+        options.setdefault("delimiter", ";")
         options.setdefault("quoting", csv.QUOTE_MINIMAL)
         options.setdefault("sheetdelimiter", "--------")
         options.setdefault("dateformat", None)
@@ -292,8 +292,8 @@ class Xlsx2csv:
         for name in filter(lambda f: filename and f.lower() == filename.lower()[1:], self.ziphandle.namelist()):
             # python2.4 fix
             if not hasattr(self.ziphandle, "open"):
-                return StringIO(self.ziphandle.read(name))
-            return self.ziphandle.open(name, "r")
+                return StringIO(self.ziphandle.read(name.decode('cp866')))
+            return self.ziphandle.open(name.decode('cp866'), "r")
         return None
 
     def _parse(self, klass, filename):
@@ -917,7 +917,7 @@ if __name__ == "__main__":
     if "ArgumentParser" in globals():
         parser = ArgumentParser(description = "xlsx to csv converter")
         parser.add_argument('infile', metavar='xlsxfile', help="xlsx file path")
-        parser.add_argument('outfile', metavar='outfile', nargs='?', help="output csv file path")
+        parser.add_argument('outfile', metavar='outfile', nargs='?', help="output csv file path", default='Выгрузка от ' + datetime.datetime.today().strftime('%Y-%m-%d') + '.csv')
         parser.add_argument('-v', '--version', action='version', version=__version__)
         nargs_plus = "+"
         argparser = True
@@ -936,8 +936,8 @@ if __name__ == "__main__":
       help="export all sheets")
     parser.add_argument("-c", "--outputencoding", dest="outputencoding", default="utf-8", action="store",
       help="encoding of output csv ** Python 3 only ** (default: utf-8)")
-    parser.add_argument("-d", "--delimiter", dest="delimiter", default=",",
-      help="delimiter - columns delimiter in csv, 'tab' or 'x09' for a tab (default: comma ',')")
+    parser.add_argument("-d", "--delimiter", dest="delimiter", default=";",
+      help="delimiter - columns delimiter in csv, 'tab' or 'x09' for a tab (default: comma ';')")
     parser.add_argument("--hyperlinks", "--hyperlinks", dest="hyperlinks", action="store_true", default=False,
       help="include hyperlinks")
     parser.add_argument("-e", "--escape", dest='escape_strings', default=False, action="store_true",
@@ -989,7 +989,7 @@ if __name__ == "__main__":
     elif options.delimiter == 'tab' or options.delimiter == '\\t':
         options.delimiter = '\t'
     elif options.delimiter == 'comma':
-        options.delimiter = ','
+        options.delimiter = ';'
     elif options.delimiter[0] == 'x':
         options.delimiter = chr(int(options.delimiter[1:]))
     else:
